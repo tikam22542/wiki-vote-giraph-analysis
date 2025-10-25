@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Convert wiki-Vote.txt to Giraph adjacency list format."""
-
 from collections import defaultdict
 
 def convert_edge_list_to_adjacency(input_file, output_file):
