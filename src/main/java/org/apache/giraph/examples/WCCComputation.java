@@ -17,23 +17,24 @@ public class WCCComputation extends BasicComputation<
         long currentComponent = vertex.getValue().get();
         boolean changed = false;
         
+        // Superstep 0: Initialize with own ID
         if (getSuperstep() == 0) {
             vertex.setValue(new LongWritable(vertex.getId().get()));
             sendMessageToAllEdges(vertex, vertex.getValue());
             return;
         }
         
-        for (LongWritable message : messages) {
-            long msgValue = message.get();
-            if (msgValue < currentComponent) {
-                currentComponent = msgValue;
+        // Find minimum label among messages
+        for (LongWritable msg : messages) {
+            if (msg.get() < currentComponent) {
+                currentComponent = msg.get();
                 changed = true;
             }
         }
         
         if (changed) {
             vertex.setValue(new LongWritable(currentComponent));
-            sendMessageToAllEdges(vertex, vertex.getValue());
+            sendMessageToAllEdges(vertex, new LongWritable(currentComponent));
         }
         
         vertex.voteToHalt();
