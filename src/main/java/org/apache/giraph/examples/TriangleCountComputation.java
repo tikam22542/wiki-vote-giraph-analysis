@@ -11,10 +11,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Counts triangles by exchanging neighbor lists.
- * Each vertex sends its neighbor list, receives others, and counts intersections.
- */
 public class TriangleCountComputation extends BasicComputation<
     LongWritable, IntWritable, NullWritable, ArrayWritable> {
     
@@ -23,14 +19,12 @@ public class TriangleCountComputation extends BasicComputation<
         Vertex<LongWritable, IntWritable, NullWritable> vertex,
         Iterable<ArrayWritable> messages) throws IOException {
         
-        // Superstep 0: Send neighbor list to all neighbors
         if (getSuperstep() == 0) {
             Set<Long> neighbors = new HashSet<>();
             for (Edge<LongWritable, NullWritable> edge : vertex.getEdges()) {
                 neighbors.add(edge.getTargetVertexId().get());
             }
             
-            // Convert to array and broadcast
             LongWritable[] neighborArray = new LongWritable[neighbors.size()];
             int i = 0;
             for (Long neighbor : neighbors) {
@@ -44,7 +38,6 @@ public class TriangleCountComputation extends BasicComputation<
             }
             
         } else if (getSuperstep() == 1) {
-            // Superstep 1: Count triangles
             Set<Long> myNeighbors = new HashSet<>();
             for (Edge<LongWritable, NullWritable> edge : vertex.getEdges()) {
                 myNeighbors.add(edge.getTargetVertexId().get());
@@ -52,7 +45,6 @@ public class TriangleCountComputation extends BasicComputation<
             
             int triangleCount = 0;
             
-            // For each received neighbor list, count common neighbors
             for (ArrayWritable message : messages) {
                 for (LongWritable neighborId : (LongWritable[]) message.toArray()) {
                     if (myNeighbors.contains(neighborId.get())) {
@@ -61,7 +53,6 @@ public class TriangleCountComputation extends BasicComputation<
                 }
             }
             
-            // Each triangle counted 3 times, store count
             vertex.setValue(new IntWritable(triangleCount));
         }
         
