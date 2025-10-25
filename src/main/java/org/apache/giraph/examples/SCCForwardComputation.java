@@ -9,10 +9,6 @@ import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.Writable;
 import java.io.IOException;
 
-/**
- * Forward BFS phase for SCC computation.
- * Each vertex tracks which vertices can reach it.
- */
 public class SCCForwardComputation extends BasicComputation<
     LongWritable, MapWritable, NullWritable, LongWritable> {
     
@@ -27,7 +23,6 @@ public class SCCForwardComputation extends BasicComputation<
         }
         boolean changed = false;
         
-        // Initialize: vertex can reach itself
         if (getSuperstep() == 0) {
             reachableSet.put(vertex.getId(), new BooleanWritable(true));
             vertex.setValue(reachableSet);
@@ -35,7 +30,6 @@ public class SCCForwardComputation extends BasicComputation<
             return;
         }
         
-        // Add all received reachable vertices
         for (LongWritable message : messages) {
             if (!reachableSet.containsKey(message)) {
                 reachableSet.put(new LongWritable(message.get()), new BooleanWritable(true));
@@ -43,7 +37,6 @@ public class SCCForwardComputation extends BasicComputation<
             }
         }
         
-        // Propagate new reachable vertices
         if (changed) {
             vertex.setValue(reachableSet);
             for (Writable key : reachableSet.keySet()) {
